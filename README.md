@@ -11,6 +11,8 @@ potemin_face_encoding = face_recognition.face_encodings(potemin_image)[0]
 known_face_encodings = [
     potemin_face_encoding
 ]
+
+
 known_face_names = [
     'Potemin'
 ]
