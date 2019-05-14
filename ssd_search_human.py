@@ -4,6 +4,7 @@ import time
 import cv2
 import os
 import face_recognition
+# from FaceSSDDetecter import FaceSSDDetecter
 
 CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
 	"bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
@@ -18,7 +19,24 @@ net = cv2.dnn.readNetFromCaffe("./MobileNetSSD_deploy.prototxt.txt", "./MobileNe
 confidence_thresh = 0.1
 threshold = 0.1
 # video_capture = cv2.VideoCapture('./../test_out_04.avi')
-video_capture = cv2.VideoCapture(1)
+video_capture = cv2.VideoCapture(0)
+# print("loading face ssd")
+# fsd = FaceSSDDetecter("./FaceSSD.prototxt.txt", "./FaceSSD.caffemodel")
+
+# test_image = face_recognition.load_image_file('../test.png')
+# test_face_encoding = face_recognition.face_encodings(test_image)[0]
+
+# known_face_encodings = [
+#     test_face_encoding
+# ]
+# known_face_names = [
+#     'Test'
+# ]
+
+# face_locations = []
+# face_encodings = []
+# face_names = []
+
 while True:
     ret, frame = video_capture.read()
     image_full = cv2.resize(frame, (0, 0), fx=0.7, fy=0.7)
@@ -68,17 +86,41 @@ while True:
                 y = int(y)
                 w = int(w)
                 h = int(h)
-                crop = image_full[y:y+h, x:x+w]
-                crop = crop[:, :, ::-1]
-                face_locations = face_recognition.face_locations(crop)
-                for (top, right, bottom, left) in face_locations:
-                    cv2.rectangle(image_full, (x+left, y+top), (x+right, y+bottom), (0, 0, 255), 2)
-                # draw a bounding box rectangle and label on the image
-                color = [int(c) for c in COLORS[classIDs[i]]]
-                cv2.rectangle(image_full, (x, y), (x + w, y + h), color, 2)
-                text = "{}: {:.4f}".format(CLASSES[classIDs[i]], confidences[i])
-                cv2.putText(image_full, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5, color, 2)
+                if w > 50 and h > 50 and y > 0 and x > 0:
+                    crop = image_full[y:y+h//1, x:x+w]
+                    crop = crop[:, :, ::-1]
+                    face_locations = face_recognition.face_locations(crop)
+                    # face_locations = fsd.face_locations(crop)
+                    # face_encodings = face_recognition.face_encodings(crop, face_locations)
+
+                    # face_names = []
+                    # for face_encoding in face_encodings:
+
+                    #     matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+                    #     name = "Unknown"
+
+                    #     if True in matches:
+                    #         first_match_index = matches.index(True)
+                    #         name = known_face_names[first_match_index]
+
+                    #     face_names.append(name)
+                    # for (top, right, bottom, left), name in zip(face_locations, face_names):
+                    for (top, right, bottom, left) in face_locations:
+                        left+=x
+                        top+=y
+                        right+=x
+                        bottom+=y
+                        
+                        # cv2.imshow("face", image_full[top: bottom, left:right])
+                        cv2.rectangle(image_full, (left, top), (right, bottom), (0, 0, 255), 2)
+                        # font = cv2.FONT_HERSHEY_DUPLEX
+                        # cv2.putText(image_full, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+                    # draw a bounding box rectangle and label on the image
+                    color = [int(c) for c in COLORS[classIDs[i]]]
+                    cv2.rectangle(image_full, (x, y), (x + w, y + h), color, 2)
+                    text = "{}: {:.4f}".format(CLASSES[classIDs[i]], confidences[i])
+                    cv2.putText(image_full, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5, color, 2)
     cv2.imshow("Image", image_full)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
