@@ -208,7 +208,14 @@ def detectAndTrackMultipleFaces():
 
                         
                         faceNames[currentFaceID] = name
-                        act = {'status':'student','name':name,'alarm':'False'}
+                        alarm_bool = (name == 'Unknown')
+                        
+                        if name != 'Unknown':
+                            status_type = 'student'
+                        else:
+                            status_type = 'Unknown' 
+                        
+                        act = {'status':status_type,'name':name, 'alarm':str(alarm_bool)}
                         database.append_action(cam, act)
 
                         # Счетчик idшников

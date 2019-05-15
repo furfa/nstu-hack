@@ -15,6 +15,8 @@ import dlib
 tracker = dlib.correlation_tracker()
 tracking_face = 0
 
+faceCascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+
 CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
 	"bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
 	"dog", "horse", "motorbike", "person", "pottedplant", "sheep",
@@ -23,7 +25,7 @@ COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
 
 # load our serialized model from disk
 print("[INFO] loading model...")
-net = cv2.dnn.readNetFromCaffe("./MobileNetSSD_deploy.prototxt.txt", "./MobileNetSSD_deploy.caffemodel")
+net = cv2.dnn.readNetFromCaffe("./PersonDetectors/MobileNetSSD_deploy.prototxt.txt", "./PersonDetectors/MobileNetSSD_deploy.caffemodel")
 
 confidence_thresh = 0.3
 threshold = 0.3
@@ -70,7 +72,13 @@ while True:
     face_locations = face_recognition.face_locations(rgb_small_frame)
     if process_this_frame:
 
-        face_locations = face_recognition.face_locations(rgb_small_frame)
+        gray = cv2.cvtColor(image_full, cv2.COLOR_BGR2GRAY)
+
+        # face_locations = face_recognition.face_locations(image_full)
+        face_locations = faceCascade.detectMultiScale(gray, 1.3, 5)
+
+        face_locations = [(_y, _x+_w, _y+_h, _x) for (_x,_y,_w,_h) in face_locations]
+        # face_locations = face_recognition.face_locations(rgb_small_frame)
         face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
 
         face_names = []
