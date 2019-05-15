@@ -38,10 +38,8 @@ def detectAndTrackMultipleFaces():
     process_this_frame = True
 
 
-    cv2.namedWindow("base-image", cv2.WINDOW_AUTOSIZE)
     cv2.namedWindow("result-image", cv2.WINDOW_AUTOSIZE)
 
-    cv2.moveWindow("base-image", 0, 100)
     cv2.moveWindow("result-image", 400, 100)
 
     cv2.startWindowThread()
@@ -58,7 +56,7 @@ def detectAndTrackMultipleFaces():
         while True:
             rc,fullSizeBaseImage = capture.read()
 
-            baseImage = cv2.resize(fullSizeBaseImage, (0,0), fx = 0.5, fy = 0.5)
+            baseImage = cv2.resize(fullSizeBaseImage, (0,0), fx = 0.6, fy = 0.6)
             baseImage = baseImage[:, :, ::-1]
 
             pressedKey = cv2.waitKey(5)
@@ -92,7 +90,7 @@ def detectAndTrackMultipleFaces():
 
 
 
-
+                #best param = 6
             if (frameCounter % 6) == 0:
 
 
