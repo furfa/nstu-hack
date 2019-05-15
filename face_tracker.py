@@ -1,21 +1,24 @@
-#Import the OpenCV and dlib libraries
 import cv2
 import dlib
-
-
 import threading
 import time
+import face_recognition
+import pickle
+from utils import BD
+from roma_bd import BD_roman
 
-#Initialize a face cascade using the frontal face haar cascade provided with
-#the OpenCV library
-#Make sure that you copy this file from the opencv project to the root of this
-#project folder
-faceCascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
-#The deisred output width and height
+
 OUTPUT_SIZE_WIDTH = 775
 OUTPUT_SIZE_HEIGHT = 600
 
+
+faceCascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+
+with open('data_roma.pickle', 'rb') as f:
+     data = pickle.load(f)
+
+known_face_names, known_face_encodings = data.get_data()
 
 #We are not doing really face recognition
 def doRecognizePerson(faceNames, fid):
@@ -57,7 +60,8 @@ def detectAndTrackMultipleFaces():
             rc,fullSizeBaseImage = capture.read()
 
             #Resize the image to 320x240
-            baseImage = cv2.resize( fullSizeBaseImage, ( 800, 800))
+            baseImage = cv2.resize(fullSizeBaseImage, ( int(1920/2), 540))
+            baseImage = baseImage[:, :, ::-1]
 
             #Check if a key was pressed and if it was Q, then break
             #from the infinite loop
@@ -76,11 +80,11 @@ def detectAndTrackMultipleFaces():
 
 
             #STEPS:
-            # * Update all trackers and remove the ones that are not 
+            # * Update all trackers and remove the ones that are not
             #   relevant anymore
             # * Every 10 frames:
             #       + Use face detection on the current frame and look
-            #         for faces. 
+            #         for faces.
             #       + For each found face, check if centerpoint is within
             #         existing tracked box. If so, nothing to do
             #       + If centerpoint is NOT in existing tracked box, then
@@ -88,7 +92,7 @@ def detectAndTrackMultipleFaces():
 
 
             #Increase the framecounter
-            frameCounter += 1 
+            frameCounter += 1
 
 
 
@@ -122,7 +126,34 @@ def detectAndTrackMultipleFaces():
                 gray = cv2.cvtColor(baseImage, cv2.COLOR_BGR2GRAY)
                 #Now use the haar cascade detector to find all faces
                 #in the image
-                faces = faceCascade.detectMultiScale(gray, 1.3, 3)
+
+                face_locations = faceCascade.detectMultiScale(gray, 1.3, 5)
+                # top, right, bottom, left
+                face_locations = [(_y, _x+_w, _y+_h, _x) for (_x,_y,_w,_h) in face_locations]
+                
+                # y = top
+                # x = left
+                # h = bottom - y
+                # w = right - x 
+
+
+
+                
+                
+                face_encodings = face_recognition.face_encodings(baseImage, face_locations)
+                face_names = []
+                for face_encoding in face_encodings:
+
+                    matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+                    name = "Unknown"
+
+                    if True in matches:
+                        first_match_index = matches.index(True)
+                        name = known_face_names[first_match_index]
+
+                    face_names.append(name)
+
+                # process_this_frame = not process_this_frame
 
 
 
@@ -132,25 +163,27 @@ def detectAndTrackMultipleFaces():
                 #requirement of the dlib tracker. If we omit the cast to
                 #int here, you will get cast errors since the detector
                 #returns numpy.int32 and the tracker requires an int
-                for (_x,_y,_w,_h) in faces:
-                    x = int(_x)
-                    y = int(_y)
-                    w = int(_w)
-                    h = int(_h)
+                for (top, right, bottom, left) in face_locations:
+                    y = top
+                    x = left
+                    h = bottom - y
+                    w = right - x 
+
+
 
 
                     #calculate the centerpoint
                     x_bar = x + 0.5 * w
                     y_bar = y + 0.5 * h
-                
 
 
-                    #Variable holding information which faceid we 
+
+                    #Variable holding information which faceid we
                     #matched with
                     matchedFid = None
 
-                    #Now loop over all the trackers and check if the 
-                    #centerpoint of the face is within the box of a 
+                    #Now loop over all the trackers and check if the
+                    #centerpoint of the face is within the box of a
                     #tracker
                     for fid in faceTrackers.keys():
                         tracked_position =  faceTrackers[fid].get_position()
@@ -159,20 +192,22 @@ def detectAndTrackMultipleFaces():
                         t_y = int(tracked_position.top())
                         t_w = int(tracked_position.width())
                         t_h = int(tracked_position.height())
+                        
 
+                        
 
                         #calculate the centerpoint
                         t_x_bar = t_x + 0.5 * t_w
                         t_y_bar = t_y + 0.5 * t_h
 
-                        #check if the centerpoint of the face is within the 
+                        #check if the centerpoint of the face is within the
                         #rectangleof a tracker region. Also, the centerpoint
-                        #of the tracker region must be within the region 
+                        #of the tracker region must be within the region
                         #detected as a face. If both of these conditions hold
                         #we have a match
-                        if ( ( t_x <= x_bar   <= (t_x + t_w)) and 
-                             ( t_y <= y_bar   <= (t_y + t_h)) and 
-                             ( x   <= t_x_bar <= (x   + w  )) and 
+                        if ( ( t_x <= x_bar   <= (t_x + t_w)) and
+                             ( t_y <= y_bar   <= (t_y + t_h)) and
+                             ( x   <= t_x_bar <= (x   + w  )) and
                              ( y   <= t_y_bar <= (y   + h  ))):
                             matchedFid = fid
 
@@ -182,7 +217,7 @@ def detectAndTrackMultipleFaces():
 
                         print("Creating new tracker " + str(currentFaceID))
 
-                        #Create and store the tracker 
+                        #Create and store the tracker
                         tracker = dlib.correlation_tracker()
                         tracker.start_track(baseImage,
                                             dlib.rectangle( x-10,
@@ -192,7 +227,7 @@ def detectAndTrackMultipleFaces():
 
                         faceTrackers[ currentFaceID ] = tracker
 
-                        #Start a new thread that is used to simulate 
+                        #Start a new thread that is used to simulate
                         #face recognition. This is not yet implemented in this
                         #version :)
                         t = threading.Thread( target = doRecognizePerson ,
@@ -218,21 +253,23 @@ def detectAndTrackMultipleFaces():
                 t_w = int(tracked_position.width())
                 t_h = int(tracked_position.height())
 
+
+                top = t_y
+                bottom = t_y + t_h
+                right = t_x + t_w
+                left = t_x
+                
+
                 cv2.rectangle(resultImage, (t_x, t_y),
                                         (t_x + t_w , t_y + t_h),
                                         rectangleColor ,2)
 
 
-                if fid in faceNames.keys():
-                    cv2.putText(resultImage, faceNames[fid] , 
-                                (int(t_x + t_w/2), int(t_y)), 
-                                cv2.FONT_HERSHEY_SIMPLEX,
-                                0.5, (255, 255, 255), 2)
-                else:
-                    cv2.putText(resultImage, "Detecting..." , 
-                                (int(t_x + t_w/2), int(t_y)), 
-                                cv2.FONT_HERSHEY_SIMPLEX,
-                                0.5, (255, 255, 255), 2)
+                cv2.rectangle(resultImage, (left, top), (right, bottom), (0, 0, 255), 2)
+
+                cv2.rectangle(resultImage, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
+                font = cv2.FONT_HERSHEY_DUPLEX
+                cv2.putText(resultImage, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
 
 
