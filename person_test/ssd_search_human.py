@@ -4,7 +4,7 @@ import time
 import cv2
 import os
 import face_recognition
-# from FaceSSDDetecter import FaceSSDDetecter
+# from FaceSSDDetector import FaceSSDDetector
 
 CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
 	"bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
@@ -18,10 +18,10 @@ net = cv2.dnn.readNetFromCaffe("./MobileNetSSD_deploy.prototxt.txt", "./MobileNe
 
 confidence_thresh = 0.1
 threshold = 0.1
-# video_capture = cv2.VideoCapture('./../test_out_04.avi')
-video_capture = cv2.VideoCapture(0)
+video_capture = cv2.VideoCapture('./../test_out_04.avi')
+# video_capture = cv2.VideoCapture(0)
 # print("loading face ssd")
-# fsd = FaceSSDDetecter("./FaceSSD.prototxt.txt", "./FaceSSD.caffemodel")
+# fsd = FaceSSDDetector("./FaceSSD.prototxt.txt", "./FaceSSD.caffemodel")
 
 # test_image = face_recognition.load_image_file('../test.png')
 # test_face_encoding = face_recognition.face_encodings(test_image)[0]
