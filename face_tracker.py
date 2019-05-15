@@ -29,7 +29,7 @@ def doRecognizePerson(faceNames, fid, name):
 
 def detectAndTrackMultipleFaces():
     #Open the first webcame device
-    capture = cv2.VideoCapture('test_out_04.avi')
+    capture = cv2.VideoCapture('../test_out_04.avi')
     process_this_frame = True
 
 
@@ -61,12 +61,12 @@ def detectAndTrackMultipleFaces():
             rc,fullSizeBaseImage = capture.read()
 
             #Resize the image to 320x240
-            baseImage = cv2.resize(fullSizeBaseImage, (0,0), fx = 0.8, fy = 0.8)
+            baseImage = cv2.resize(fullSizeBaseImage, (0,0), fx = 0.5, fy = 0.5)
             baseImage = baseImage[:, :, ::-1]
 
             #Check if a key was pressed and if it was Q, then break
             #from the infinite loop
-            pressedKey = cv2.waitKey(30)
+            pressedKey = cv2.waitKey(5)
             if pressedKey == ord('Q'):
                 break
 
@@ -117,12 +117,24 @@ def detectAndTrackMultipleFaces():
 
                 
                 
-                face_locations = face_recognition.face_locations(baseImage)
-                # face_locations = faceCascade.detectMultiScale(gray, 1.3, 5)
+                # face_locations = face_recognition.face_locations(baseImage)
+                face_locations = faceCascade.detectMultiScale(gray, 1.3, 5)
                 # top, right, bottom, left
 
-                # face_locations = [(_y, _x+_w, _y+_h, _x) for (_x,_y,_w,_h) in face_locations]
+                
+
+                fl = []
+                # qwe = 1
+                for (_x,_y,_w,_h) in face_locations:
+                    if (_w**2 + _h**2)**0.5 < 100:
+                        fl.append((_x,_y,_w,_h))
+                face_locations = fl
+                del fl
+
+                face_locations = [(_y, _x+_w, _y+_h, _x) for (_x,_y,_w,_h) in face_locations]
+
                 face_encodings = face_recognition.face_encodings(baseImage, face_locations)
+                
                 face_names = []
                 for face_encoding in face_encodings:
 
