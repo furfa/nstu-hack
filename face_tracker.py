@@ -11,8 +11,6 @@ import time
 
 
 
-# def add_to_db(time, name, status):
-
 
 OUTPUT_SIZE_WIDTH = 775
 OUTPUT_SIZE_HEIGHT = 600
@@ -241,20 +239,24 @@ def detectAndTrackMultipleFaces():
 
 
                 
-                cv2.rectangle(resultImage, (t_x, t_y),
-                                        (t_x + t_w , t_y + t_h),
-                                        rectangleColor ,2)
+                # cv2.rectangle(resultImage, (t_x, t_y),
+                #                         (t_x + t_w , t_y + t_h),
+                #                         (0,0,255) ,2)
                 print(faceNames)
+
+                cv2.rectangle(resultImage, (left, top), (right, bottom), (0, 0, 255), 2)
+
+                cv2.rectangle(resultImage, (left, bottom - 10), (right, bottom), (0, 0, 255), cv2.FILLED)
+                font = cv2.FONT_HERSHEY_DUPLEX
+        # cv2.putText(image_full, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+
+
                 try:
-                    cv2.putText(resultImage, faceNames[fid] , 
-                            (int(t_x + t_w/2), int(t_y)), 
-                            cv2.FONT_HERSHEY_SIMPLEX,
-                            0.5, (255, 255, 255), 2)
+
+                    cv2.putText(resultImage, faceNames[fid], (left + 2, bottom - 1), font, 0.4, (255, 255, 255), 1)
                 except KeyError:
-                                cv2.putText(resultImage, 'Can`t rec' , 
-                            (int(t_x + t_w/2), int(t_y)), 
-                            cv2.FONT_HERSHEY_SIMPLEX,
-                            0.5, (255, 255, 255), 2)
+                                cv2.putText(resultImage, faceNames[fid], (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
+
 
 
 
