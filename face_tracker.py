@@ -6,7 +6,12 @@ import face_recognition
 import pickle
 from utils import BD
 from roma_bd import BD_roman
+from db.FaceDB import FileDB
+import time
 
+
+
+# def add_to_db(time, name, status):
 
 
 OUTPUT_SIZE_WIDTH = 775
@@ -20,53 +25,45 @@ with open('data_roma.pickle', 'rb') as f:
 
 known_face_names, known_face_encodings = data.get_data()
 
-#We are not doing really face recognition
 def doRecognizePerson(faceNames, fid, name):
     faceNames[fid] = name
+
+
+database = FileDB('database.json')
 
 
 
 
 def detectAndTrackMultipleFaces():
-    #Open the first webcame device
-    capture = cv2.VideoCapture('test_out_04.avi')
+    cam = 'test_out_04.avi'
+    capture = cv2.VideoCapture(cam)
     process_this_frame = True
 
 
-    #Create two opencv named windows
     cv2.namedWindow("base-image", cv2.WINDOW_AUTOSIZE)
     cv2.namedWindow("result-image", cv2.WINDOW_AUTOSIZE)
 
-    #Position the windows next to eachother
     cv2.moveWindow("base-image", 0, 100)
     cv2.moveWindow("result-image", 400, 100)
 
-    #Start the window thread for the two windows we are using
     cv2.startWindowThread()
 
-    #The color of the rectangle we draw around the face
     rectangleColor = (0,165,255)
 
-    #variables holding the current frame number and the current faceid
     frameCounter = 0
     currentFaceID = 0
 
-    #Variables holding the correlation trackers and the name per faceid
     faceTrackers = {}
     faceNames = {}
 
     try:
         while True:
-            #Retrieve the latest image from the webcam
             rc,fullSizeBaseImage = capture.read()
 
-            #Resize the image to 320x240
-            baseImage = cv2.resize(fullSizeBaseImage, (0,0), fx = 0.8, fy = 0.8)
+            baseImage = cv2.resize(fullSizeBaseImage, (0,0), fx = 0.5, fy = 0.5)
             baseImage = baseImage[:, :, ::-1]
 
-            #Check if a key was pressed and if it was Q, then break
-            #from the infinite loop
-            pressedKey = cv2.waitKey(30)
+            pressedKey = cv2.waitKey(5)
             if pressedKey == ord('Q'):
                 break
 
@@ -98,7 +95,7 @@ def detectAndTrackMultipleFaces():
 
 
 
-            if (frameCounter % 10) == 0:
+            if (frameCounter % 6) == 0:
 
 
 
@@ -117,12 +114,24 @@ def detectAndTrackMultipleFaces():
 
                 
                 
-                face_locations = face_recognition.face_locations(baseImage)
-                # face_locations = faceCascade.detectMultiScale(gray, 1.3, 5)
+                # face_locations = face_recognition.face_locations(baseImage)
+                face_locations = faceCascade.detectMultiScale(gray, 1.3, 5)
                 # top, right, bottom, left
 
-                # face_locations = [(_y, _x+_w, _y+_h, _x) for (_x,_y,_w,_h) in face_locations]
+                
+
+                fl = []
+                qwe = 1
+                for (_x,_y,_w,_h) in face_locations:
+                    if (_w**2 + _h**2)**0.5 < 100:
+                        fl.append((_x,_y,_w,_h))
+                face_locations = fl
+                del fl
+
+                face_locations = [(_y, _x+_w, _y+_h, _x) for (_x,_y,_w,_h) in face_locations]
+
                 face_encodings = face_recognition.face_encodings(baseImage, face_locations)
+                
                 face_names = []
                 for face_encoding in face_encodings:
 
@@ -150,14 +159,12 @@ def detectAndTrackMultipleFaces():
 
 
 
-                    #calculate the centerpoint
                     x_bar = x + 0.5 * w
                     y_bar = y + 0.5 * h
 
 
 
-                    #Variable holding information which faceid we
-                    #matched with
+ 
                     matchedFid = None
 
        
@@ -172,7 +179,7 @@ def detectAndTrackMultipleFaces():
 
                         
 
-                        #calculate the centerpoint
+                        #Считаем центр
                         t_x_bar = t_x + 0.5 * t_w
                         t_y_bar = t_y + 0.5 * t_h
 
@@ -183,7 +190,7 @@ def detectAndTrackMultipleFaces():
                              ( y   <= t_y_bar <= (y   + h  ))):
                             matchedFid = fid
 
-                                        #If no matched fid, then we have to create a new tracker
+                                        # Если нет трека, делаем новый
                     if matchedFid is None:
                   
 
@@ -201,8 +208,10 @@ def detectAndTrackMultipleFaces():
 
                         
                         faceNames[currentFaceID] = name
+                        act = {'status':'student','name':name,'alarm':'False'}
+                        database.append_action(cam, act)
 
-                        #Increase the currentFaceID counter
+                        # Счетчик idшников
                         currentFaceID += 1
 
 
@@ -246,7 +255,7 @@ def detectAndTrackMultipleFaces():
             # largeResult = cv2.resize(resultImage,
             #                          (OUTPUT_SIZE_WIDTH,OUTPUT_SIZE_HEIGHT))
 
-            #Finally, we want to show the images on the screen
+            # Рисуем
             cv2.imshow("result-image", resultImage)
 
 
