@@ -4,9 +4,11 @@ import time
 import cv2
 import os
 import face_recognition
+import pickle
+
 
 net = cv2.dnn.readNetFromDarknet("./yolov3-tiny.cfg", "./yolov3-tiny.weights")
-video_capture = cv2.VideoCapture(0)
+video_capture = cv2.VideoCapture('test_out_04.avi')
 # video_capture = cv2.VideoCapture(1)
 ln = net.getLayerNames()
 ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
@@ -17,14 +19,22 @@ potemin_face_encoding = face_recognition.face_encodings(potemin_image)[0]
 vasya_image = face_recognition.load_image_file('vasya.jpg')
 vasya_face_encoding = face_recognition.face_encodings(vasya_image)[0]
 
-known_face_encodings = [
-    potemin_face_encoding,
-    vasya_face_encoding
-]
-known_face_names = [
-    'Roman',
-    'Vasya'
-]
+
+with open('data_v1.pickle', 'rb') as f:
+     data = pickle.load(f)
+
+known_face_names, known_face_encodings = data.get_data()
+
+
+
+# known_face_encodings = [
+#     potemin_face_encoding,
+#     vasya_face_encoding
+# ]
+# known_face_names = [
+#     'Roman',
+#     'Vasya'
+# ]
 
 face_locations = []
 face_encodings = []
