@@ -39,7 +39,7 @@ class SocketReciver:
         t2 = Thread(target=self.update2, args=())
         t2.daemon = True
         t2.start()
-        self.last_action = None
+        self.last_mes = None
         data = b""
 
     def update2(self):
