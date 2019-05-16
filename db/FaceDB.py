@@ -11,6 +11,7 @@ class FileDB:
             self.f = open(self.file_name, "w+")
             self.f.write(json.dumps(self.data))
             self.f.close()
+
     def append_action(self, cam, action):
         t = time.localtime()
 
@@ -22,6 +23,7 @@ class FileDB:
         self.f = open(self.file_name, "w+")
         self.f.write(json_text)
         self.f.close()
+
     def read_data(self):
         self.f = open(self.file_name, "r")
         json_test = self.f.read()

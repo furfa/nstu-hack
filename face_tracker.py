@@ -11,8 +11,6 @@ import time
 
 
 
-# def add_to_db(time, name, status):
-
 
 OUTPUT_SIZE_WIDTH = 775
 OUTPUT_SIZE_HEIGHT = 600
@@ -40,10 +38,8 @@ def detectAndTrackMultipleFaces():
     process_this_frame = True
 
 
-    cv2.namedWindow("base-image", cv2.WINDOW_AUTOSIZE)
     cv2.namedWindow("result-image", cv2.WINDOW_AUTOSIZE)
 
-    cv2.moveWindow("base-image", 0, 100)
     cv2.moveWindow("result-image", 400, 100)
 
     cv2.startWindowThread()
@@ -60,7 +56,7 @@ def detectAndTrackMultipleFaces():
         while True:
             rc,fullSizeBaseImage = capture.read()
 
-            baseImage = cv2.resize(fullSizeBaseImage, (0,0), fx = 0.5, fy = 0.5)
+            baseImage = cv2.resize(fullSizeBaseImage, (0,0), fx = 0.6, fy = 0.6)
             baseImage = baseImage[:, :, ::-1]
 
             pressedKey = cv2.waitKey(5)
@@ -94,7 +90,7 @@ def detectAndTrackMultipleFaces():
 
 
 
-
+                #best param = 6
             if (frameCounter % 6) == 0:
 
 
@@ -208,7 +204,14 @@ def detectAndTrackMultipleFaces():
 
                         
                         faceNames[currentFaceID] = name
-                        act = {'status':'student','name':name,'alarm':'False'}
+                        alarm_bool = (name == 'Unknown')
+                        
+                        if name != 'Unknown':
+                            status_type = 'student'
+                        else:
+                            status_type = 'Unknown' 
+                        
+                        act = {'status':status_type,'name':name, 'alarm':str(alarm_bool)}
                         database.append_action(cam, act)
 
                         # Счетчик idшников
@@ -234,20 +237,24 @@ def detectAndTrackMultipleFaces():
 
 
                 
-                cv2.rectangle(resultImage, (t_x, t_y),
-                                        (t_x + t_w , t_y + t_h),
-                                        rectangleColor ,2)
+                # cv2.rectangle(resultImage, (t_x, t_y),
+                #                         (t_x + t_w , t_y + t_h),
+                #                         (0,0,255) ,2)
                 print(faceNames)
+
+                cv2.rectangle(resultImage, (left, top), (right, bottom), (0, 0, 255), 2)
+
+                cv2.rectangle(resultImage, (left, bottom - 10), (right, bottom), (0, 0, 255), cv2.FILLED)
+                font = cv2.FONT_HERSHEY_DUPLEX
+        # cv2.putText(image_full, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+
+
                 try:
-                    cv2.putText(resultImage, faceNames[fid] , 
-                            (int(t_x + t_w/2), int(t_y)), 
-                            cv2.FONT_HERSHEY_SIMPLEX,
-                            0.5, (255, 255, 255), 2)
+
+                    cv2.putText(resultImage, faceNames[fid], (left + 2, bottom - 1), font, 0.4, (255, 255, 255), 1)
                 except KeyError:
-                                cv2.putText(resultImage, 'Can`t rec' , 
-                            (int(t_x + t_w/2), int(t_y)), 
-                            cv2.FONT_HERSHEY_SIMPLEX,
-                            0.5, (255, 255, 255), 2)
+                                cv2.putText(resultImage, faceNames[fid], (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
+
 
 
 
