@@ -19,7 +19,7 @@ class SocketReciver:
         # self.sock_img.bind(("",9095))
         # self.sock_img.listen(10)
         # self.conn,addr=self.sock_img.accept()
-        self.frame = np.zeros((240,320,3), np.uint8)
+        self.frame = np.zeros((480,640,3), np.uint8)
         # context = zmq.Context()
         self.image_hub = imagezmq.ImageHub()
         self.socket = self.image_hub.zmq_context.socket(zmq.REP)

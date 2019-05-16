@@ -25,7 +25,7 @@ class SocketSender:
         
 
     def send_image(self, cam, image):
-        image = cv2.resize(image, (320, 240))
+        image = cv2.resize(image, (640, 480))
         # res, image = cv2.imencode('.jpg', image, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
         # data = pickle.dumps(image, 0)
         # size = len(data)
