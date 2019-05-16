@@ -6,5 +6,7 @@ sr = SocketReciver()
 
 while True:
     cv2.imshow("frem", sr.read())
-    print(sr.last_mes)
+    l_m = sr.read_mes()
+    if l_m != None:
+        print(l_m[0])
     cv2.waitKey(1)

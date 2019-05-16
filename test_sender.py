@@ -7,4 +7,4 @@ while True:
     _, img = cap.read()
     ss.send_image(0, img)
     # cv2.waitKey(1)
-    ss.send_action(0, {"status": "student","name": "Unknown","alarm": "False"})
+    ss.send_action(0, ["qwe", "wer"])

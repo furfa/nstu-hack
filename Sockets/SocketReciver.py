@@ -44,7 +44,7 @@ class SocketReciver:
 
     def update2(self):
         while self.runing:
-            self.last_action  = self.socket.recv_json()
+            self.last_mes  = self.socket.recv_json()
             self.socket.send_string("reply")
         
     def update(self):
@@ -83,7 +83,8 @@ class SocketReciver:
     def read(self):
         # return the frame most recently read
         return self.frame
-
+    def read_mes(self):
+        return self.last_mes
     def release(self):
         # indicate that the thread should be stopped
         # self.sock.close()
