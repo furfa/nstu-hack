@@ -16,10 +16,10 @@ class SocketSender:
         # self.sock_img = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # self.sock_img.connect((addr, 9095))
         # context = zmq.Context()
-        self.sender = imagezmq.ImageSender('tcp://127.0.0.1:5555')
+        self.sender = imagezmq.ImageSender('tcp://192.168.0.70:5555')
         self.socket = self.sender.zmq_context.socket(zmq.REQ)
         # self.socket.connect(addr+"%s" % 5588)
-        self.socket.connect("tcp://localhost:%s" % 5588)
+        self.socket.connect("tcp://192.168.0.70:%s" % 5588)
         # self.image_sender = context.socket(zmq.REQ)
         # self.image_sender.connect('tcp://localhost:5555')
         
