@@ -46,6 +46,9 @@ class Ui_Form(object):
         self.log.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.log.setObjectName("log")
         self.verticalLayout.addWidget(self.log)
+        self.grid = QtWidgets.QHBoxLayout()
+        self.grid.setObjectName("grid")
+        self.verticalLayout.addLayout(self.grid)
         self.horizontalLayout.addLayout(self.verticalLayout)
 
         self.retranslateUi(Form)
