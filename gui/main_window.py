@@ -1,5 +1,6 @@
 
 import sys
+import os
 sys.path.append("..")
 
 # import some PyQt5 modules
@@ -28,6 +29,7 @@ class MainWindow(QWidget):
 
         self.sr = SocketReciver()
 
+        self.photo_path = "../foto/"
 
         self.ui = Ui_Form()
         self.ui.setupUi(self)
@@ -62,9 +64,16 @@ class MainWindow(QWidget):
             self.add_photo()
 
 
-        for label in self.photos_layout:
-            
-            self.update_photo(label, cv2.imread("2.jpg") )
+        for i, label in enumerate( self.photos_layout ):
+            try:
+                path_to_photo = os.path.join( self.photo_path, data[str(i)]+".jpg" )
+                
+            except:
+                path_to_photo = "default"
+
+            #print(path_to_photo)
+
+            self.update_photo(label, cv2.imread(path_to_photo) )
 
 
     def add_photo(self, photo = cv2.imread("default.jpg") ):
@@ -78,7 +87,7 @@ class MainWindow(QWidget):
 
     def update_photo(self, label, image):
 
-        image = cv2.resize(image, (100, 100), )   
+        image = cv2.resize(image, (200, 300), )   
 
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         # get image infos
@@ -95,10 +104,10 @@ class MainWindow(QWidget):
     # view camera
     def viewCam(self):
         # read image in BGR format
-        
-        #ret, image = self.cap.read()
 
         image = self.sr.read()
+
+        image = cv2.resize(image, (1000, 500) )
 
 
         # convert image to RGB format
@@ -116,12 +125,6 @@ class MainWindow(QWidget):
     def controlTimer(self):
         # if timer is stopped
         if not self.cam_timer.isActive():
-            # create video capture
-            
-            
-            #self.cap = cv2.VideoCapture(0)
-
-
             # start timer
             self.cam_timer.start(50)
             # update control_bt text
@@ -130,11 +133,6 @@ class MainWindow(QWidget):
         else:
             # stop timer
             self.cam_timer.stop()
-            # release video capture
-
-
-            #self.cap.release()
-
 
             # update control_bt text
             self.ui.control_bt.setText("Start")
